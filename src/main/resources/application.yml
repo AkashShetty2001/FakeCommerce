@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: fakecommerce
+  datasource:
+    url: ${url}
+    username: ${username}
+    password: ${password}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+
