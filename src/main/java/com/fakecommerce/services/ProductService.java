@@ -33,6 +33,11 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
     }
 
+    /*
+        * Create a new product in the database
+        * its equivalent to INSERT INTO product (title, price, image, category, ratings, description)
+                        VALUES (?, ?, ?, ?, ?, ?);
+     */
     public Product createProduct(CreateProductRequestDto requestDto){
          Product newProduct = Product.builder()
                  .title(requestDto.getTitle())
@@ -45,6 +50,26 @@ public class ProductService {
 
          return productRepository.save(newProduct);
     }
+
+    /*
+        * Delete a product by id from the database
+        * its equivalent to DELETE FROM product WHERE id = ?;
+     */
+    public void deleteProductById(Long id){
+         productRepository.deleteById(id);
+    }
+
+    /*
+        * Get products by category from the database
+        * its equivalent to SELECT *
+                        FROM product
+                        WHERE category = ?;
+     */
+    public List<Product> getProductsByCategory(String category){
+        return productRepository.findByCategory(category);
+    }
+
+
 
 
 }
