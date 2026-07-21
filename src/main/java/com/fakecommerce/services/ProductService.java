@@ -56,6 +56,12 @@ public class ProductService {
         * its equivalent to DELETE FROM product WHERE id = ?;
      */
     public void deleteProductById(Long id){
+        // 1. Check if the product exists in the database
+        if (!productRepository.existsById(id)) {
+            // 2. Throw an exception if it's missing
+            throw new IllegalArgumentException("Product with ID " + id + " does not exist.");
+        }
+
          productRepository.deleteById(id);
     }
 
