@@ -75,6 +75,14 @@ public class ProductService {
         return productRepository.findByCategory(category);
     }
 
+    /*
+        * Get all distinct categories from the database
+        * its equivalent to SELECT DISTINCT category FROM product;
+     */
+    public List<String> getDistinctCategories(){
+        return productRepository.findDistinctCategories();
+    }
+
 
 
 

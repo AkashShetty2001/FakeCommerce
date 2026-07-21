@@ -41,6 +41,11 @@ public class ProductController {
         return productService.getProductsByCategory(category);
     }
 
+    @GetMapping("/categories")
+    public List<String> getDistinctCategories(){
+        return productService.getDistinctCategories();
+    }
+
 
 
 }
