@@ -46,6 +46,11 @@ public class ProductController {
         return productService.getDistinctCategories();
     }
 
+    @PutMapping("/{id}")
+    public Product updateProductById(@PathVariable Long id,@RequestBody CreateProductRequestDto requestDto){
+        return productService.updateProductById(id, requestDto);
+    }
+
 
 
 }

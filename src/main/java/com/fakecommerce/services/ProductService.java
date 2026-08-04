@@ -84,6 +84,32 @@ public class ProductService {
     }
 
 
+    public Product updateProductById(Long id, CreateProductRequestDto requestDto){
+        Product existingProduct = getProductById(id);
+
+        if (requestDto.getTitle() != null) {
+            existingProduct.setTitle(requestDto.getTitle());
+        }
+        if (requestDto.getPrice() != null) {
+            existingProduct.setPrice(requestDto.getPrice());
+        }
+        if (requestDto.getImage() != null) {
+            existingProduct.setImage(requestDto.getImage());
+        }
+        if (requestDto.getDescription() != null) {
+            existingProduct.setDescription(requestDto.getDescription());
+        }
+        if (requestDto.getRatings() != null) {
+            existingProduct.setRatings(requestDto.getRatings());
+        }
+        if (requestDto.getCategory() != null) {
+            existingProduct.setCategory(requestDto.getCategory());
+        }
+
+        return productRepository.save(existingProduct);
+    }
+
+
 
 
 }
