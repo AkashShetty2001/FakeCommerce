@@ -1,11 +1,7 @@
 package com.fakecommerce.schema;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.DynamicUpdate;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -14,14 +10,18 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@DynamicUpdate
 @Entity
 @Table(name = "products")
-public class Product {
+@EqualsAndHashCode(callSuper=true)
+public class Product extends BaseEntity {
 
-    @Id
+   /*
+        we can have common properties present inside a baseEntity class and use inheritance .
+   @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    */
+
 
     @Column(nullable = false)
     private String title;
@@ -35,6 +35,7 @@ public class Product {
 
     private String ratings;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
 }
