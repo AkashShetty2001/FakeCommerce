@@ -45,7 +45,7 @@ public class ProductService {
                  .image(requestDto.getImage())
                  .description(requestDto.getDescription())
                  .ratings(requestDto.getRatings())
-                 .category(requestDto.getCategory())
+                 //.category(requestDto.getCategory()) Todo
                  .build();
 
          return productRepository.save(newProduct);

@@ -1,5 +1,6 @@
 package com.fakecommerce.dtos;
 
+import com.fakecommerce.schema.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +20,7 @@ public class CreateProductRequestDto {
 
     private String image;
 
-    private String category;
+    private Category category;
 
     private String ratings;
 

@@ -31,7 +31,16 @@ public class Product extends BaseEntity {
 
     private String image;
 
-    private String category;
+    @ManyToOne
+    /*
+    read as many products associated to one category.
+        The @ManyToOne annotation is used to define a many-to-one relationship between two entities in a relational database.
+        In this case, it indicates that each Product entity is associated with one Category entity, while each Category entity can be associated with multiple Product entities.
+        The @JoinColumn annotation is used to specify the foreign key column that will be used to establish the relationship between the two entities.
+        In this case, the foreign key column is named "category_id" and is marked as not nullable, meaning that every Product must have an associated Category.
+     */
+    @JoinColumn(name ="category_id",nullable = false)
+    private Category category;
 
     private String ratings;
 
