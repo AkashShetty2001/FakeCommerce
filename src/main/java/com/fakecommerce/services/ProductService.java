@@ -1,7 +1,9 @@
 package com.fakecommerce.services;
 
 import com.fakecommerce.dtos.CreateProductRequestDto;
+import com.fakecommerce.repository.CategoryRepository;
 import com.fakecommerce.repository.ProductRepository;
+import com.fakecommerce.schema.Category;
 import com.fakecommerce.schema.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +14,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductService {
 
-    private final  ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
     /*
         * Get all products from the database
@@ -39,13 +42,17 @@ public class ProductService {
                         VALUES (?, ?, ?, ?, ?, ?);
      */
     public Product createProduct(CreateProductRequestDto requestDto){
+
+        Category category = categoryRepository.findById(requestDto.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found with id: " + requestDto.getCategoryId()));
+
          Product newProduct = Product.builder()
                  .title(requestDto.getTitle())
                  .price(requestDto.getPrice())
                  .image(requestDto.getImage())
                  .description(requestDto.getDescription())
                  .ratings(requestDto.getRatings())
-                 //.category(requestDto.getCategory()) Todo
+                 .category(category)
                  .build();
 
          return productRepository.save(newProduct);
@@ -102,8 +109,11 @@ public class ProductService {
         if (requestDto.getRatings() != null) {
             existingProduct.setRatings(requestDto.getRatings());
         }
-        if (requestDto.getCategory() != null) {
-            existingProduct.setCategory(requestDto.getCategory());
+        if (requestDto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(requestDto.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found with id: " + requestDto.getCategoryId()));
+
+            existingProduct.setCategory(category);
         }
 
         return productRepository.save(existingProduct);
