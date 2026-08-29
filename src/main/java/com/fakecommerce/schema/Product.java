@@ -33,7 +33,7 @@ public class Product extends BaseEntity {
 
     private String image;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     /*
     read as many products associated to one category.
         The @ManyToOne annotation is used to define a many-to-one relationship between two entities in a relational database.

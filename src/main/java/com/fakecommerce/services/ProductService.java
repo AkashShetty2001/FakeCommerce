@@ -1,6 +1,8 @@
 package com.fakecommerce.services;
 
 import com.fakecommerce.dtos.CreateProductRequestDto;
+import com.fakecommerce.dtos.GetProductResponseDto;
+import com.fakecommerce.dtos.GetProductWithDetailsDto;
 import com.fakecommerce.repository.CategoryRepository;
 import com.fakecommerce.repository.ProductRepository;
 import com.fakecommerce.schema.Category;
@@ -8,7 +10,9 @@ import com.fakecommerce.schema.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,8 +25,39 @@ public class ProductService {
         * Get all products from the database
         * its equivalent to SELECT * from Products
      */
-    public List<Product> getAllProducts(){
-        return productRepository.findAll();
+    public List<GetProductResponseDto> getAllProducts(){
+        List<Product> productList =  productRepository.findAll();
+
+       /* List<GetProductResponseDto> getProductResponseDtos = new ArrayList<>();
+
+        for(Product product : productList){
+            GetProductResponseDto getProductResponseDto = GetProductResponseDto.builder()
+                    .id(product.getId())
+                    .title(product.getTitle())
+                    .price(product.getPrice())
+                    .image(product.getImage())
+                    .ratings(product.getRatings())
+                    .description(product.getDescription())
+                    .build();
+            getProductResponseDtos.add(getProductResponseDto);
+        }
+        return getProductResponseDtos;*/
+
+        /*
+         using stream api
+         */
+
+        return productList.stream().
+                map(product -> GetProductResponseDto.builder().
+                        id(product.getId()).
+                        title(product.getTitle()).
+                        price(product.getPrice()).
+                        image(product.getImage()).
+                        ratings(product.getRatings()).
+                        description(product.getDescription()).
+                        build()
+                    ).collect(Collectors.toList());
+
     }
 
     /*
@@ -31,9 +66,17 @@ public class ProductService {
                         FROM product
                         WHERE id = ?;
      */
-    public Product getProductById(Long id){
-        return productRepository.findById(id)
+    public GetProductResponseDto getProductById(Long id){
+        return  productRepository.findById(id).
+                map(product -> GetProductResponseDto.builder()
+                        .id(product.getId())
+                        .title(product.getTitle())
+                                .price((product.getPrice()))
+                                .ratings(product.getRatings())
+                                .description(product.getDescription())
+                        .build())
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+
     }
 
     /*
@@ -92,7 +135,8 @@ public class ProductService {
 
 
     public Product updateProductById(Long id, CreateProductRequestDto requestDto){
-        Product existingProduct = getProductById(id);
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
 
         if (requestDto.getTitle() != null) {
             existingProduct.setTitle(requestDto.getTitle());
@@ -120,6 +164,21 @@ public class ProductService {
     }
 
 
+    public GetProductWithDetailsDto getProductWithDetailsById(Long id){
+       Product product = productRepository.findProductsWithDetailsById(id)
+               .stream()
+               .findFirst()
+               .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
 
+       return GetProductWithDetailsDto.builder()
+               .id(product.getId())
+               .title(product.getTitle())
+               .price(product.getPrice())
+               .image(product.getImage())
+               .ratings(product.getRatings())
+               .description(product.getDescription())
+               .category(product.getCategory())
+               .build();
+    }
 
 }
