@@ -16,6 +16,6 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLRestriction("deleted_at IS NULL")
 public class Category extends BaseEntity{
 
-    @Column(name="category_name")
+    @Column(name="category_name",nullable = false)
     private String categoryName;
 }

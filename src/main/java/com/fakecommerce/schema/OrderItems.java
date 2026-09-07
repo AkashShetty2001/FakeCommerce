@@ -10,7 +10,7 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "order_items")
+@Table(name = "order_products")
 @EqualsAndHashCode(callSuper = true)
 @SQLDelete(sql = "UPDATE order_items SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("deleted_at IS NULL")
