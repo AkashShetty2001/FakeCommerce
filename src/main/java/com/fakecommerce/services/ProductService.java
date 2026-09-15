@@ -122,7 +122,7 @@ public class ProductService {
                         WHERE category = ?;
      */
     public List<Product> getProductsByCategory(String category){
-        return productRepository.findByCategory(category);
+        return productRepository.findByCategoryCategoryName(category);
     }
 
     /*

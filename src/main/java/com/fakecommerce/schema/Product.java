@@ -48,7 +48,11 @@ public class Product extends BaseEntity {
     @JoinColumn(name ="category_id",nullable = false)
     private Category category;
 
-    private String ratings;
+    /**
+     * Numeric rating value (e.g., 4.5 out of 5).
+     * Type changed from String to BigDecimal via Flyway migration V2.
+     */
+    private BigDecimal ratings;
 
     @Column(columnDefinition = "TEXT")
     private String description;
