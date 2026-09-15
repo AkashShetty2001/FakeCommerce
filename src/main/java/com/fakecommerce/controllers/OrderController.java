@@ -58,7 +58,7 @@ public class OrderController {
      * @throws RuntimeException if order is not found
      */
     @GetMapping("/{id}")
-    public OrderResponseDto getOrderById(@PathVariable Long id) {
+    public OrderResponseDto getOrderById(@PathVariable("id") Long id) {
         return orderService.getOrderById(id);
     }
 
@@ -74,7 +74,7 @@ public class OrderController {
      * @return OrderResponseDto representing the updated order
      */
     @PutMapping("/{id}/status")
-    public OrderResponseDto updateOrderStatus(@PathVariable Long id, @RequestBody UpdateOrderStatusRequestDto requestDto) {
+    public OrderResponseDto updateOrderStatus(@PathVariable("id") Long id, @RequestBody UpdateOrderStatusRequestDto requestDto) {
         return orderService.updateOrderStatus(id, requestDto);
     }
 
@@ -88,7 +88,7 @@ public class OrderController {
      * @throws IllegalArgumentException if order does not exist
      */
     @DeleteMapping("/{id}")
-    public void deleteOrderById(@PathVariable Long id) {
+    public void deleteOrderById(@PathVariable("id") Long id) {
         orderService.deleteOrderById(id);
     }
 }
