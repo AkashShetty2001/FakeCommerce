@@ -18,16 +18,21 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+    // Returns 200 OK with list of all categories
     @GetMapping("/all")
-    public List<Category> getAllCategories(){
-        return categoryService.getAllCategories();
+    public ResponseEntity<List<Category>> getAllCategories(){
+        List<Category> categories = categoryService.getAllCategories();
+        return ResponseEntity.ok(categories);
     }
 
+    // Returns 200 OK with category details for specified ID
     @GetMapping("/{id}")
-    public Category getCategoryById(@PathVariable("id") Long id){
-        return categoryService.getCategoryById(id);
+    public ResponseEntity<Category> getCategoryById(@PathVariable("id") Long id){
+        Category category =  categoryService.getCategoryById(id);
+        return ResponseEntity.ok(category);
     }
 
+    // Returns 201 CREATED with newly created category and Location header
     @PostMapping()
     public ResponseEntity<Category> createCategory(@RequestBody CreateCategoryRequestDto categoryRequestDto){
         Category category =  categoryService.createCategory(categoryRequestDto);
@@ -37,14 +42,18 @@ public class CategoryController {
             
     }
 
+    // Returns 204 NO CONTENT after successful deletion
     @DeleteMapping("/{id}")
-    public void deleteCategoryById(@PathVariable Long id){
+    public ResponseEntity<Void> deleteCategoryById(@PathVariable Long id){
         categoryService.deleteCategoryById(id);
+        return ResponseEntity.noContent().build();
     }
 
+    // Returns 200 OK with updated category details
     @PutMapping("/{id}")
-    public Category updateCategoryById(@PathVariable Long id,@RequestBody CreateCategoryRequestDto categoryRequestDto){
-        return categoryService.updateCategoryById(id,categoryRequestDto);
+    public ResponseEntity<Category> updateCategoryById(@PathVariable Long id,@RequestBody CreateCategoryRequestDto categoryRequestDto){
+        Category category = categoryService.updateCategoryById(id,categoryRequestDto);
+        return ResponseEntity.ok(category);
     }
 
 
