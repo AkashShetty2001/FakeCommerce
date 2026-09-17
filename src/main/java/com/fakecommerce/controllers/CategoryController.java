@@ -4,6 +4,9 @@ import com.fakecommerce.dtos.CreateCategoryRequestDto;
 import com.fakecommerce.schema.Category;
 import com.fakecommerce.services.CategoryService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,13 +24,17 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public Category getCategoryById(@PathVariable Long id){
+    public Category getCategoryById(@PathVariable("id") Long id){
         return categoryService.getCategoryById(id);
     }
 
     @PostMapping()
-    public Category createCategory(@RequestBody CreateCategoryRequestDto categoryRequestDto){
-        return categoryService.createCategory(categoryRequestDto);
+    public ResponseEntity<Category> createCategory(@RequestBody CreateCategoryRequestDto categoryRequestDto){
+        Category category =  categoryService.createCategory(categoryRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header("Location", "/api/v1/categories/" + category.getId())
+                .body(category);
+            
     }
 
     @DeleteMapping("/{id}")
