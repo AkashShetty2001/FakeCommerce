@@ -1,6 +1,7 @@
 package com.fakecommerce.services;
 
 import com.fakecommerce.dtos.CreateCategoryRequestDto;
+import com.fakecommerce.exceptions.CategoryNotFoundException;
 import com.fakecommerce.repository.CategoryRepository;
 import com.fakecommerce.schema.Category;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class CategoryService {
 
     public Category getCategoryById(Long id){
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + id));
     }
 
     public Category createCategory(CreateCategoryRequestDto categoryRequestDto){
@@ -34,14 +35,14 @@ public class CategoryService {
 
     public void deleteCategoryById(Long id){
       if(!categoryRepository.existsById(id)){
-          throw new RuntimeException("Category not found with id: " + id);
+          throw new CategoryNotFoundException("Category not found with id: " + id);
       }
         categoryRepository.deleteById(id);
     }
 
     public Category updateCategoryById(Long id, CreateCategoryRequestDto categoryRequestDto){
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + id));
         category.setCategoryName(categoryRequestDto.getCategoryName());
         return categoryRepository.save(category);
     }
