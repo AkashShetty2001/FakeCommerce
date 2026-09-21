@@ -36,8 +36,23 @@ out/
 ### VS Code ###
 .vscode/
 
-### git ###
+### Sensitive/Configuration Files ###
 .env
+.env.local
+.env.*.local
+mcp.json
+*.key
+*.pem
+credentials.json
+secrets.*
+application-*.properties
+!application-dev.properties.example
+!application-prod.properties.example
+config.local.*
+
+### Dependencies ###
+node_modules/
+package-lock.json
 
 ### JVM Crash Dumps ###
 hs_err_pid*.log
