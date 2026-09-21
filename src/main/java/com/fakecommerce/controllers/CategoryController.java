@@ -23,14 +23,14 @@ public class CategoryController {
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<Category>>> getAllCategories(){
         List<Category> categories = categoryService.getAllCategories();
-        return ResponseEntity.ok(ApiResponse.success("Categories fetched successfully", categories));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Categories fetched successfully", categories));
     }
 
     // Returns 200 OK with category details for specified ID
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Category>> getCategoryById(@PathVariable("id") Long id){
         Category category =  categoryService.getCategoryById(id);
-        return ResponseEntity.ok(ApiResponse.success("Category fetched successfully", category));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Category fetched successfully", category));
     }
 
     // Returns 201 CREATED with newly created category and Location header
@@ -45,16 +45,16 @@ public class CategoryController {
 
     // Returns 200 OK after successful deletion
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteCategoryById(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<Object>> deleteCategoryById(@PathVariable Long id){
         categoryService.deleteCategoryById(id);
-        return ResponseEntity.ok(ApiResponse.success("Category deleted successfully", null));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Category deleted successfully", null));
     }
 
     // Returns 200 OK with updated category details
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Category>> updateCategoryById(@PathVariable Long id,@RequestBody CreateCategoryRequestDto categoryRequestDto){
         Category category = categoryService.updateCategoryById(id,categoryRequestDto);
-        return ResponseEntity.ok(ApiResponse.success("Category updated successfully", category));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Category updated successfully", category));
     }
 
 

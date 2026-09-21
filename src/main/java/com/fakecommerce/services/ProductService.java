@@ -3,10 +3,14 @@ package com.fakecommerce.services;
 import com.fakecommerce.dtos.CreateProductRequestDto;
 import com.fakecommerce.dtos.GetProductResponseDto;
 import com.fakecommerce.dtos.GetProductWithDetailsDto;
+import com.fakecommerce.exceptions.CategoryNotFoundException;
+import com.fakecommerce.exceptions.ResourceNotFoundException;
 import com.fakecommerce.repository.CategoryRepository;
 import com.fakecommerce.repository.ProductRepository;
 import com.fakecommerce.schema.Category;
 import com.fakecommerce.schema.Product;
+import com.fakecommerce.utils.ApiResponse;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -75,7 +79,7 @@ public class ProductService {
                                 .ratings(product.getRatings())
                                 .description(product.getDescription())
                         .build())
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
     }
 
@@ -87,7 +91,7 @@ public class ProductService {
     public Product createProduct(CreateProductRequestDto requestDto){
 
         Category category = categoryRepository.findById(requestDto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + requestDto.getCategoryId()));
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + requestDto.getCategoryId()));
 
          Product newProduct = Product.builder()
                  .title(requestDto.getTitle())
@@ -109,7 +113,7 @@ public class ProductService {
         // 1. Check if the product exists in the database
         if (!productRepository.existsById(id)) {
             // 2. Throw an exception if it's missing
-            throw new IllegalArgumentException("Product with ID " + id + " does not exist.");
+            throw new ResourceNotFoundException("Product with ID " + id + " does not exist.");
         }
 
          productRepository.deleteById(id);
@@ -136,7 +140,7 @@ public class ProductService {
 
     public Product updateProductById(Long id, CreateProductRequestDto requestDto){
         Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
         if (requestDto.getTitle() != null) {
             existingProduct.setTitle(requestDto.getTitle());
@@ -155,7 +159,7 @@ public class ProductService {
         }
         if (requestDto.getCategoryId() != null) {
             Category category = categoryRepository.findById(requestDto.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found with id: " + requestDto.getCategoryId()));
+                    .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + requestDto.getCategoryId()));
 
             existingProduct.setCategory(category);
         }
@@ -168,7 +172,7 @@ public class ProductService {
        Product product = productRepository.findProductsWithDetailsById(id)
                .stream()
                .findFirst()
-               .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+               .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
        return GetProductWithDetailsDto.builder()
                .id(product.getId())
