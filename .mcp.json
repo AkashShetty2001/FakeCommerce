@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "git": {
-      "command": "git",
-      "args": []
-    }
-  }
-}
