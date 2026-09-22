@@ -2,6 +2,7 @@ package com.fakecommerce.services;
 
 import com.fakecommerce.dtos.*;
 import com.fakecommerce.exceptions.ResourceNotFoundException;
+import com.fakecommerce.mappers.OrderMapper;
 import com.fakecommerce.repository.OrderItemsRepository;
 import com.fakecommerce.repository.OrderRepository;
 import com.fakecommerce.repository.ProductRepository;
@@ -20,6 +21,9 @@ import java.util.stream.Collectors;
 /**
  * OrderService contains all business logic related to orders.
  * It handles order creation, retrieval, status updates, and deletion.
+ * Entity -> DTO mapping is delegated to OrderMapper (MapStruct); order items
+ * are fetched separately via OrderItemsRepository (rather than relying on
+ * Order.items, which is lazy-loaded) and passed into the mapper explicitly.
  * Uses constructor injection for repositories (@RequiredArgsConstructor from Lombok).
  */
 @Service
@@ -29,6 +33,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemsRepository orderItemsRepository;
     private final ProductRepository productRepository;
+    private final OrderMapper orderMapper;
 
     /**
      * Create a new order from the provided CreateOrderRequestDto.
@@ -160,8 +165,8 @@ public class OrderService {
 
     /**
      * Private helper method to map an Order entity to an OrderResponseDto.
-     * Fetches all OrderItems for the order, enriches them with product details,
-     * and assembles the complete response DTO.
+     * Fetches all OrderItems for the order and delegates the DTO assembly
+     * (including enriched item details and computed subtotals) to OrderMapper.
      * Used by all methods that return OrderResponseDto.
      *
      * @param order the Order entity to map
@@ -171,23 +176,6 @@ public class OrderService {
         // Fetch all OrderItems for this order
         List<OrderItems> orderItems = orderItemsRepository.findByOrderId(order.getId());
 
-        // Convert each OrderItems to OrderItemResponseDto
-        List<OrderItemResponseDto> itemResponseDtos = orderItems.stream()
-                .map(item -> OrderItemResponseDto.builder()
-                        .productId(item.getProduct().getId())
-                        .productTitle(item.getProduct().getTitle())
-                        .price(item.getProduct().getPrice())
-                        .quantity(item.getQuantity())
-                        .subtotal(item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
-                        .build())
-                .collect(Collectors.toList());
-
-        // Build and return the OrderResponseDto
-        return OrderResponseDto.builder()
-                .id(order.getId())
-                .status(order.getStatus())
-                .items(itemResponseDtos)
-                .totalAmount(order.getTotalAmount())
-                .build();
+        return orderMapper.toResponseDto(order, orderItems);
     }
 }

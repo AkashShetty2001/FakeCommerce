@@ -1,6 +1,5 @@
 package com.fakecommerce.dtos;
 
-import com.fakecommerce.schema.Category;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -12,5 +11,6 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 public class GetProductWithDetailsDto extends GetProductResponseDto {
 
-    private Category category;
+    // Mapped from Product.category via CategoryMapper so entities are never exposed directly.
+    private CategoryResponseDto category;
 }

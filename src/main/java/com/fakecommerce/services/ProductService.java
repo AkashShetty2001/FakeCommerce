@@ -5,109 +5,82 @@ import com.fakecommerce.dtos.GetProductResponseDto;
 import com.fakecommerce.dtos.GetProductWithDetailsDto;
 import com.fakecommerce.exceptions.CategoryNotFoundException;
 import com.fakecommerce.exceptions.ResourceNotFoundException;
+import com.fakecommerce.mappers.ProductMapper;
 import com.fakecommerce.repository.CategoryRepository;
 import com.fakecommerce.repository.ProductRepository;
 import com.fakecommerce.schema.Category;
 import com.fakecommerce.schema.Product;
-import com.fakecommerce.utils.ApiResponse;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * ProductService contains all business logic related to products.
+ * Entity <-> DTO mapping is delegated to ProductMapper (MapStruct); category
+ * resolution stays here since it requires a CategoryRepository lookup.
+ */
 @Service
 @RequiredArgsConstructor
 public class ProductService {
 
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
 
-    /*
-        * Get all products from the database
-        * its equivalent to SELECT * from Products
+    /**
+     * Get all products from the database.
+     * Equivalent to SELECT * FROM products.
+     *
+     * @return a list of all products mapped to GetProductResponseDto
      */
     public List<GetProductResponseDto> getAllProducts(){
-        List<Product> productList =  productRepository.findAll();
-
-       /* List<GetProductResponseDto> getProductResponseDtos = new ArrayList<>();
-
-        for(Product product : productList){
-            GetProductResponseDto getProductResponseDto = GetProductResponseDto.builder()
-                    .id(product.getId())
-                    .title(product.getTitle())
-                    .price(product.getPrice())
-                    .image(product.getImage())
-                    .ratings(product.getRatings())
-                    .description(product.getDescription())
-                    .build();
-            getProductResponseDtos.add(getProductResponseDto);
-        }
-        return getProductResponseDtos;*/
-
-        /*
-         using stream api
-         */
-
-        return productList.stream().
-                map(product -> GetProductResponseDto.builder().
-                        id(product.getId()).
-                        title(product.getTitle()).
-                        price(product.getPrice()).
-                        image(product.getImage()).
-                        ratings(product.getRatings()).
-                        description(product.getDescription()).
-                        build()
-                    ).collect(Collectors.toList());
-
+        List<Product> productList = productRepository.findAll();
+        return productMapper.toResponseDtoList(productList);
     }
 
-    /*
-        * Get product by id from the database, if not found throw an exception
-        * its equivalent to SELECT *
-                        FROM product
-                        WHERE id = ?;
+    /**
+     * Get a single product by id.
+     * Equivalent to SELECT * FROM product WHERE id = ?.
+     *
+     * @param id the product ID to retrieve
+     * @return GetProductResponseDto for the found product
+     * @throws ResourceNotFoundException if no product exists with the given id
      */
     public GetProductResponseDto getProductById(Long id){
-        return  productRepository.findById(id).
-                map(product -> GetProductResponseDto.builder()
-                        .id(product.getId())
-                        .title(product.getTitle())
-                                .price((product.getPrice()))
-                                .ratings(product.getRatings())
-                                .description(product.getDescription())
-                        .build())
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-
+        return productMapper.toResponseDto(product);
     }
 
-    /*
-        * Create a new product in the database
-        * its equivalent to INSERT INTO product (title, price, image, category, ratings, description)
-                        VALUES (?, ?, ?, ?, ?, ?);
+    /**
+     * Create a new product.
+     * Equivalent to INSERT INTO product (title, price, image, category, ratings, description) VALUES (...).
+     * The category is resolved from categoryId before saving since MapStruct
+     * cannot look up an entity from just an id.
+     *
+     * @param requestDto the request DTO with product fields and categoryId
+     * @return GetProductResponseDto for the newly created product
+     * @throws CategoryNotFoundException if the referenced category does not exist
      */
-    public Product createProduct(CreateProductRequestDto requestDto){
-
+    public GetProductResponseDto createProduct(CreateProductRequestDto requestDto){
         Category category = categoryRepository.findById(requestDto.getCategoryId())
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + requestDto.getCategoryId()));
 
-         Product newProduct = Product.builder()
-                 .title(requestDto.getTitle())
-                 .price(requestDto.getPrice())
-                 .image(requestDto.getImage())
-                 .description(requestDto.getDescription())
-                 .ratings(requestDto.getRatings())
-                 .category(category)
-                 .build();
+        Product newProduct = productMapper.toEntity(requestDto);
+        newProduct.setCategory(category);
 
-         return productRepository.save(newProduct);
+        Product savedProduct = productRepository.save(newProduct);
+        return productMapper.toResponseDto(savedProduct);
     }
 
-    /*
-        * Delete a product by id from the database
-        * its equivalent to DELETE FROM product WHERE id = ?;
+    /**
+     * Delete a product by id.
+     * Equivalent to DELETE FROM product WHERE id = ?.
+     *
+     * @param id the product ID to delete
+     * @throws ResourceNotFoundException if no product exists with the given id
      */
     public void deleteProductById(Long id){
         // 1. Check if the product exists in the database
@@ -116,73 +89,73 @@ public class ProductService {
             throw new ResourceNotFoundException("Product with ID " + id + " does not exist.");
         }
 
-         productRepository.deleteById(id);
+        productRepository.deleteById(id);
     }
 
-    /*
-        * Get products by category from the database
-        * its equivalent to SELECT *
-                        FROM product
-                        WHERE category = ?;
+    /**
+     * Get products filtered by category name.
+     * Equivalent to SELECT * FROM product WHERE category = ?.
+     *
+     * @param category the category name to filter by
+     * @return a list of matching products mapped to GetProductResponseDto
      */
-    public List<Product> getProductsByCategory(String category){
-        return productRepository.findByCategoryCategoryName(category);
+    public List<GetProductResponseDto> getProductsByCategory(String category){
+        List<Product> products = productRepository.findByCategoryCategoryName(category);
+        return productMapper.toResponseDtoList(products);
     }
 
-    /*
-        * Get all distinct categories from the database
-        * its equivalent to SELECT DISTINCT category FROM product;
+    /**
+     * Get all distinct category names present on products.
+     * Equivalent to SELECT DISTINCT category FROM product.
+     *
+     * @return a list of distinct category names
      */
     public List<String> getDistinctCategories(){
         return productRepository.findDistinctCategories();
     }
 
-
-    public Product updateProductById(Long id, CreateProductRequestDto requestDto){
+    /**
+     * Update an existing product. Only non-null fields on the request DTO are
+     * applied (partial update), matching the previous manual-if behavior.
+     * If categoryId is provided, the category is re-resolved and re-assigned.
+     *
+     * @param id the product ID to update
+     * @param requestDto the request DTO with fields to update
+     * @return GetProductResponseDto for the updated product
+     * @throws ResourceNotFoundException if no product exists with the given id
+     * @throws CategoryNotFoundException if the referenced category does not exist
+     */
+    public GetProductResponseDto updateProductById(Long id, CreateProductRequestDto requestDto){
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
-        if (requestDto.getTitle() != null) {
-            existingProduct.setTitle(requestDto.getTitle());
-        }
-        if (requestDto.getPrice() != null) {
-            existingProduct.setPrice(requestDto.getPrice());
-        }
-        if (requestDto.getImage() != null) {
-            existingProduct.setImage(requestDto.getImage());
-        }
-        if (requestDto.getDescription() != null) {
-            existingProduct.setDescription(requestDto.getDescription());
-        }
-        if (requestDto.getRatings() != null) {
-            existingProduct.setRatings(requestDto.getRatings());
-        }
+        productMapper.updateEntityFromDto(requestDto, existingProduct);
+
         if (requestDto.getCategoryId() != null) {
             Category category = categoryRepository.findById(requestDto.getCategoryId())
                     .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + requestDto.getCategoryId()));
-
             existingProduct.setCategory(category);
         }
 
-        return productRepository.save(existingProduct);
+        Product updatedProduct = productRepository.save(existingProduct);
+        return productMapper.toResponseDto(updatedProduct);
     }
 
-
+    /**
+     * Get a single product with its full details, including the resolved category.
+     * Equivalent to SELECT * FROM product JOIN category WHERE product.id = ?.
+     *
+     * @param id the product ID to retrieve
+     * @return GetProductWithDetailsDto with the product and its mapped category
+     * @throws ResourceNotFoundException if no product exists with the given id
+     */
     public GetProductWithDetailsDto getProductWithDetailsById(Long id){
-       Product product = productRepository.findProductsWithDetailsById(id)
-               .stream()
-               .findFirst()
-               .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        Product product = productRepository.findProductsWithDetailsById(id)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
-       return GetProductWithDetailsDto.builder()
-               .id(product.getId())
-               .title(product.getTitle())
-               .price(product.getPrice())
-               .image(product.getImage())
-               .ratings(product.getRatings())
-               .description(product.getDescription())
-               .category(product.getCategory())
-               .build();
+        return productMapper.toDetailsResponseDto(product);
     }
 
 }
