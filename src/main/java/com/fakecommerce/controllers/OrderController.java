@@ -4,6 +4,8 @@ import com.fakecommerce.dtos.CreateOrderRequestDto;
 import com.fakecommerce.dtos.OrderResponseDto;
 import com.fakecommerce.dtos.UpdateOrderStatusRequestDto;
 import com.fakecommerce.services.OrderService;
+import com.fakecommerce.utils.ApiResponse;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,9 +37,9 @@ public class OrderController {
      * @return ResponseEntity with 201 CREATED and OrderResponseDto
      */
     @PostMapping()
-    public ResponseEntity<OrderResponseDto> createOrder(@RequestBody CreateOrderRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<OrderResponseDto>> createOrder(@RequestBody CreateOrderRequestDto requestDto) {
         OrderResponseDto order = orderService.createOrder(requestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(order);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Order created successfully", order));
     }
 
     /**
@@ -48,9 +50,9 @@ public class OrderController {
      * @return ResponseEntity with 200 OK and List<OrderResponseDto> (empty list if none exist)
      */
     @GetMapping("/all")
-    public ResponseEntity<List<OrderResponseDto>> getAllOrders() {
+    public ResponseEntity<ApiResponse<List<OrderResponseDto>>> getAllOrders() {
         List<OrderResponseDto> orders = orderService.getAllOrders();
-        return ResponseEntity.ok(orders);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Orders retrieved successfully", orders));
     }
 
     /**
@@ -63,9 +65,9 @@ public class OrderController {
      * @throws RuntimeException if order is not found
      */
     @GetMapping("/{id}")
-    public ResponseEntity<OrderResponseDto> getOrderById(@PathVariable("id") Long id) {
+    public ResponseEntity<ApiResponse<OrderResponseDto>> getOrderById(@PathVariable("id") Long id) {
         OrderResponseDto order = orderService.getOrderById(id);
-        return ResponseEntity.ok(order);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Order retrieved successfully", order));
     }
 
     /**
@@ -80,9 +82,9 @@ public class OrderController {
      * @return ResponseEntity with 200 OK and OrderResponseDto representing the updated order
      */
     @PutMapping("/{id}/status")
-    public ResponseEntity<OrderResponseDto> updateOrderStatus(@PathVariable Long id, @RequestBody UpdateOrderStatusRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<OrderResponseDto>> updateOrderStatus(@PathVariable Long id, @RequestBody UpdateOrderStatusRequestDto requestDto) {
         OrderResponseDto order = orderService.updateOrderStatus(id, requestDto);
-        return ResponseEntity.ok(order);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Order status updated successfully", order));
     }
 
     /**
@@ -96,9 +98,9 @@ public class OrderController {
      * @throws IllegalArgumentException if order does not exist
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrderById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteOrderById(@PathVariable Long id) {
         orderService.deleteOrderById(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Order deleted successfully", null));
     }
 }
 

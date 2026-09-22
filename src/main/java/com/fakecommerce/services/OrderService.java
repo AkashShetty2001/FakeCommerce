@@ -1,6 +1,7 @@
 package com.fakecommerce.services;
 
 import com.fakecommerce.dtos.*;
+import com.fakecommerce.exceptions.ResourceNotFoundException;
 import com.fakecommerce.repository.OrderItemsRepository;
 import com.fakecommerce.repository.OrderRepository;
 import com.fakecommerce.repository.ProductRepository;
@@ -57,7 +58,7 @@ public class OrderService {
         for (OrderItemRequestDto itemDto : requestDto.getItems()) {
             // Fetch the product; throw exception if not found
             Product product = productRepository.findById(itemDto.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found with id: " + itemDto.getProductId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + itemDto.getProductId()));
 
             // Validate quantity
             if (itemDto.getQuantity() == null || itemDto.getQuantity() <= 0) {
@@ -116,7 +117,7 @@ public class OrderService {
      */
     public OrderResponseDto getOrderById(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
         return mapToOrderResponseDto(order);
     }
 
@@ -131,7 +132,7 @@ public class OrderService {
      */
     public OrderResponseDto updateOrderStatus(Long id, UpdateOrderStatusRequestDto requestDto) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
 
         order.setStatus(requestDto.getStatus());
         Order updatedOrder = orderRepository.save(order);
