@@ -1,7 +1,7 @@
 package com.fakecommerce.controllers;
 
+import com.fakecommerce.dtos.CategoryResponseDto;
 import com.fakecommerce.dtos.CreateCategoryRequestDto;
-import com.fakecommerce.schema.Category;
 import com.fakecommerce.services.CategoryService;
 import com.fakecommerce.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,22 +21,22 @@ public class CategoryController {
 
     // Returns 200 OK with list of all categories
     @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<Category>>> getAllCategories(){
-        List<Category> categories = categoryService.getAllCategories();
+    public ResponseEntity<ApiResponse<List<CategoryResponseDto>>> getAllCategories(){
+        List<CategoryResponseDto> categories = categoryService.getAllCategories();
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Categories fetched successfully", categories));
     }
 
     // Returns 200 OK with category details for specified ID
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Category>> getCategoryById(@PathVariable("id") Long id){
-        Category category =  categoryService.getCategoryById(id);
+    public ResponseEntity<ApiResponse<CategoryResponseDto>> getCategoryById(@PathVariable("id") Long id){
+        CategoryResponseDto category =  categoryService.getCategoryById(id);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Category fetched successfully", category));
     }
 
     // Returns 201 CREATED with newly created category and Location header
     @PostMapping()
-    public ResponseEntity<ApiResponse<Category>> createCategory(@RequestBody CreateCategoryRequestDto categoryRequestDto){
-        Category category =  categoryService.createCategory(categoryRequestDto);
+    public ResponseEntity<ApiResponse<CategoryResponseDto>> createCategory(@RequestBody CreateCategoryRequestDto categoryRequestDto){
+        CategoryResponseDto category =  categoryService.createCategory(categoryRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header("Location", "/api/v1/categories/" + category.getId())
                 .body(ApiResponse.success("Category created successfully", category));
@@ -52,8 +52,8 @@ public class CategoryController {
 
     // Returns 200 OK with updated category details
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Category>> updateCategoryById(@PathVariable Long id,@RequestBody CreateCategoryRequestDto categoryRequestDto){
-        Category category = categoryService.updateCategoryById(id,categoryRequestDto);
+    public ResponseEntity<ApiResponse<CategoryResponseDto>> updateCategoryById(@PathVariable Long id,@RequestBody CreateCategoryRequestDto categoryRequestDto){
+        CategoryResponseDto category = categoryService.updateCategoryById(id,categoryRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success("Category updated successfully", category));
     }
 

@@ -1,11 +1,12 @@
 package com.fakecommerce.services;
 
+import com.fakecommerce.dtos.CategoryResponseDto;
 import com.fakecommerce.dtos.CreateCategoryRequestDto;
 import com.fakecommerce.exceptions.CategoryNotFoundException;
+import com.fakecommerce.mappers.CategoryMapper;
 import com.fakecommerce.repository.CategoryRepository;
 import com.fakecommerce.schema.Category;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,21 +17,24 @@ public class CategoryService {
 
 
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
-    public List<Category> getAllCategories(){
-        return categoryRepository.findAll();
+    public List<CategoryResponseDto> getAllCategories(){
+        return categoryRepository.findAll().stream()
+                .map(categoryMapper::toResponseDto)
+                .toList();
     }
 
-    public Category getCategoryById(Long id){
-        return categoryRepository.findById(id)
+    public CategoryResponseDto getCategoryById(Long id){
+        Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + id));
+        return categoryMapper.toResponseDto(category);
     }
 
-    public Category createCategory(CreateCategoryRequestDto categoryRequestDto){
-        Category newCategory = Category.builder()
-                .categoryName(categoryRequestDto.getCategoryName())
-                .build();
-        return categoryRepository.save(newCategory);
+    public CategoryResponseDto createCategory(CreateCategoryRequestDto categoryRequestDto){
+        Category newCategory = categoryMapper.toEntity(categoryRequestDto);
+        Category savedCategory = categoryRepository.save(newCategory);
+        return categoryMapper.toResponseDto(savedCategory);
     }
 
     public void deleteCategoryById(Long id){
@@ -40,10 +44,11 @@ public class CategoryService {
         categoryRepository.deleteById(id);
     }
 
-    public Category updateCategoryById(Long id, CreateCategoryRequestDto categoryRequestDto){
+    public CategoryResponseDto updateCategoryById(Long id, CreateCategoryRequestDto categoryRequestDto){
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + id));
         category.setCategoryName(categoryRequestDto.getCategoryName());
-        return categoryRepository.save(category);
+        Category updatedCategory = categoryRepository.save(category);
+        return categoryMapper.toResponseDto(updatedCategory);
     }
 }
